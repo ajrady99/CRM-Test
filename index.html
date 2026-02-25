@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Usona Philanthropy CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1e2335;
+    --border: #2a3050;
+    --accent: #c9a96e;
+    --accent2: #7eb8c9;
+    --text: #e8eaf0;
+    --muted: #6b7494;
+    --success: #6dbf8a;
+    --tag-bg: #1a2540;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    height: 58px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .topbar-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+  }
+  .topbar-brand span { color: var(--muted); font-weight: 300; font-size: 0.85rem; margin-left: 10px; font-family: 'DM Sans', sans-serif; }
+  .topbar-right { display: flex; gap: 12px; align-items: center; }
+  .badge {
+    font-size: 0.7rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .badge-demo { background: #3a2a10; color: var(--accent); border: 1px solid #6b4a20; }
+  .badge-m365 { background: #102030; color: var(--accent2); border: 1px solid #1a4060; }
+
+  /* LAYOUT */
+  .layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 300px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar-header {
+    padding: 20px 20px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .search-box {
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 14px 9px 36px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-box input:focus { border-color: var(--accent); }
+  .search-box input::placeholder { color: var(--muted); }
+  .search-icon {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 6px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .filter-chip {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    background: transparent;
+  }
+  .filter-chip:hover, .filter-chip.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: #1e1600;
+  }
+
+  .contact-list {
+    overflow-y: auto;
+    flex: 1;
+  }
+  .contact-list::-webkit-scrollbar { width: 4px; }
+  .contact-list::-webkit-scrollbar-track { background: transparent; }
+  .contact-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .contact-item {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .contact-item:hover { background: var(--surface2); }
+  .contact-item.active { background: var(--surface2); border-left: 3px solid var(--accent); }
+
+  .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .contact-info { flex: 1; min-width: 0; }
+  .contact-name { font-size: 0.88rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .contact-meta { font-size: 0.75rem; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .contact-gift { font-size: 0.75rem; color: var(--success); font-weight: 600; flex-shrink: 0; }
+
+  /* MAIN PANEL */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .detail-header {
+    padding: 28px 36px 22px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .detail-name-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+  .detail-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .detail-name-info h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .detail-name-info p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .detail-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .tag {
+    font-size: 0.68rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--tag-bg);
+    color: var(--accent2);
+    border: 1px solid #1e3550;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 20px;
+  }
+  .stat-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    flex: 1;
+    min-width: 0;
+  }
+  .stat-label {
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .stat-sub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 36px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    padding: 14px 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* CONTENT */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 36px;
+  }
+  .content::-webkit-scrollbar { width: 4px; }
+  .content::-webkit-scrollbar-track { background: transparent; }
+  .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* TIMELINE */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .timeline-item {
+    display: flex;
+    gap: 18px;
+    padding-bottom: 24px;
+    position: relative;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 17px;
+    top: 36px;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+  .timeline-item:last-child::before { display: none; }
+
+  .timeline-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .icon-email { background: #102030; color: var(--accent2); border: 1px solid #1a4060; }
+  .icon-note { background: #1a1500; color: var(--accent); border: 1px solid #3a3000; }
+  .icon-file { background: #0f1f10; color: var(--success); border: 1px solid #1a3a1a; }
+  .icon-gift { background: #200f20; color: #c97eb8; border: 1px solid #401a40; }
+
+  .timeline-body {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    transition: border-color 0.15s;
+  }
+  .timeline-body:hover { border-color: var(--border); background: var(--surface2); }
+
+  .tl-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .tl-subject { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+  .tl-date { font-size: 0.72rem; color: var(--muted); flex-shrink: 0; margin-left: 12px; }
+  .tl-from { font-size: 0.75rem; color: var(--muted); margin-bottom: 8px; }
+  .tl-preview { font-size: 0.82rem; color: #a0a8c0; line-height: 1.55; }
+  .tl-attachment {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 0.72rem;
+    color: var(--accent2);
+    background: #102030;
+    border: 1px solid #1a4060;
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  .tl-attachment:hover { background: #1a3050; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--muted);
+    text-align: center;
+    gap: 12px;
+  }
+  .empty-icon { font-size: 2.5rem; opacity: 0.3; }
+  .empty-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--muted); }
+  .empty-sub { font-size: 0.82rem; max-width: 280px; line-height: 1.55; }
+
+  /* NOTES TAB */
+  .notes-grid { display: flex; flex-direction: column; gap: 14px; }
+  .note-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .note-meta { font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; display: flex; gap: 12px; }
+  .note-text { font-size: 0.85rem; color: var(--text); line-height: 1.65; }
+
+  /* DOCS TAB */
+  .docs-grid { display: flex; flex-direction: column; gap: 10px; }
+  .doc-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .doc-row:hover { background: var(--surface2); }
+  .doc-icon { font-size: 1.3rem; }
+  .doc-info { flex: 1; }
+  .doc-name { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+  .doc-meta { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+  .doc-arrow { color: var(--muted); font-size: 0.85rem; }
+
+  /* ANIMATION */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in { animation: fadeUp 0.25s ease forwards; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">Usona Institute <span>Philanthropy CRM</span></div>
+  <div class="topbar-right">
+    <span class="badge badge-demo">Demo Mode</span>
+    <span class="badge badge-m365">M365 Ready</span>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Contacts</div>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search contacts..." oninput="filterContacts()">
+      </div>
+    </div>
+    <div class="filter-row">
+      <button class="filter-chip active" onclick="setFilter('all', this)">All</button>
+      <button class="filter-chip" onclick="setFilter('prospect', this)">Prospects</button>
+      <button class="filter-chip" onclick="setFilter('donor', this)">Donors</button>
+      <button class="filter-chip" onclick="setFilter('foundation', this)">Foundations</button>
+    </div>
+    <div class="contact-list" id="contactList"></div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main" id="mainPanel">
+    <div class="empty-state">
+      <div class="empty-icon">✦</div>
+      <div class="empty-title">Select a Contact</div>
+      <div class="empty-sub">Choose a contact from the list to view their giving history, communications, and documents.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const COLORS = [
+  ['#2a1f00','#c9a96e'],['#0f1f2a','#7eb8c9'],['#1a0f2a','#b87ec9'],
+  ['#0f2a1a','#6dbf8a'],['#2a0f1a','#c97e9e'],['#1a2a0f','#a0bf6d']
+];
+
+const contacts = [
+  {
+    id: 1, name: "Margaret & Harold Whitfield", org: "Whitfield Family Foundation",
+    email: "m.whitfield@whitfieldfdn.org", type: "foundation",
+    lastGift: "$50,000", highestGift: "$250,000", totalGiving: "$780,000", lastContact: "Jan 14, 2025",
+    stage: "Active Donor", tags: ["Major Gift", "Research Focus", "Annual Fund"],
+    communications: [
+      { type: "email", icon: "✉", date: "Jan 14, 2025", subject: "Thank you — Year-End Impact Report", from: "Liz Hartmann → m.whitfield@whitfieldfdn.org", preview: "Dear Margaret and Harold, I wanted to personally reach out to share the extraordinary progress we've made in 2024 thanks to your continued support. The Phase II trial results have been remarkable...", attachment: "Usona_2024_Impact_Report.pdf" },
+      { type: "note", icon: "📝", date: "Dec 19, 2024", subject: "Call Notes — Year-end Stewardship", from: "Logged by: Liz Hartmann", preview: "Had a warm 20-minute call with Margaret. She expressed excitement about the Phase II results. Harold is recovering from surgery — send a card. They are considering a significant gift in Q1 2025 and would like to discuss naming opportunities at the new facility. Follow up in January." },
+      { type: "email", icon: "✉", date: "Nov 3, 2024", subject: "Re: Site Visit Scheduling", from: "m.whitfield@whitfieldfdn.org → Liz Hartmann", preview: "Liz, we would absolutely love to arrange a visit in the new year. January or February work best for us. Harold is especially interested in meeting the research team and touring the lab spaces. Perhaps a small dinner afterward?..." },
+      { type: "gift", icon: "💛", date: "Oct 15, 2024", subject: "Gift Received — $50,000", from: "Processing: Finance / Gift Admin", preview: "Annual fund gift received. Check #4421. Designated: Unrestricted Research Support. Acknowledgment letter sent Oct 17." },
+      { type: "file", icon: "📄", date: "Sep 2, 2024", subject: "Grant Agreement Executed", from: "SharePoint: /Philanthropy/Whitfield/2024", preview: "Executed grant agreement for $50,000 annual commitment. Signed copies stored in SharePoint." }
+    ],
+    docs: [
+      { icon: "📋", name: "Whitfield Grant Agreement 2024.pdf", meta: "SharePoint · Modified Sep 2, 2024", size: "1.2 MB" },
+      { icon: "📊", name: "Gift History Summary — Whitfield.xlsx", meta: "SharePoint · Modified Jan 3, 2025", size: "340 KB" },
+      { icon: "📝", name: "Site Visit Briefing Doc.docx", meta: "SharePoint · Modified Nov 15, 2024", size: "215 KB" },
+      { icon: "📄", name: "2023 Stewardship Report — Custom.pdf", meta: "SharePoint · Modified Mar 12, 2024", size: "4.1 MB" },
+    ]
+  },
+  {
+    id: 2, name: "Dr. Steven Kowalski", org: "Individual Donor",
+    email: "steve.kowalski@gmail.com", type: "donor",
+    lastGift: "$10,000", highestGift: "$25,000", totalGiving: "$87,500", lastContact: "Feb 1, 2025",
+    stage: "Active Donor", tags: ["Recurring Donor", "Research Interest", "Newsletter"],
+    communications: [
+      { type: "email", icon: "✉", date: "Feb 1, 2025", subject: "Exciting update from the lab", from: "Liz Hartmann → steve.kowalski@gmail.com", preview: "Steve, I thought of you immediately when I heard the latest results from our psilocybin trial. The team has seen statistically significant improvements in treatment-resistant depression markers that..." },
+      { type: "note", icon: "📝", date: "Jan 10, 2025", subject: "Coffee meeting — Madison", from: "Logged by: Liz Hartmann", preview: "Met Steve for coffee at Colectivo on State St. He is very engaged with the science and has been reading the published papers. Mentioned his sister is dealing with treatment-resistant depression — he sees this work as deeply personal. Open to a major gift conversation in 2025. Invited to spring cultivation event." },
+      { type: "gift", icon: "💛", date: "Dec 31, 2024", subject: "Year-End Gift — $10,000", from: "Processing: Finance / Gift Admin", preview: "Online gift received via Stripe. Designated: General Research. Auto-acknowledgment sent; personal note to follow." },
+    ],
+    docs: [
+      { icon: "📋", name: "Kowalski Gift History.pdf", meta: "SharePoint · Modified Jan 3, 2025", size: "188 KB" },
+      { icon: "📝", name: "Cultivation Plan 2025 — Kowalski.docx", meta: "SharePoint · Modified Jan 12, 2025", size: "95 KB" },
+    ]
+  },
+  {
+    id: 3, name: "Aurora Health Foundation", org: "Corporate Foundation",
+    email: "grants@aurorahealth.org", type: "foundation",
+    lastGift: "$100,000", highestGift: "$100,000", totalGiving: "$100,000", lastContact: "Jan 28, 2025",
+    stage: "New Partner", tags: ["Foundation Grant", "LOI Submitted", "Healthcare Aligned"],
+    communications: [
+      { type: "email", icon: "✉", date: "Jan 28, 2025", subject: "Re: Letter of Inquiry — Psilocybin Research Initiative", from: "grants@aurorahealth.org → Liz Hartmann", preview: "Thank you for submitting your Letter of Inquiry. The program committee has reviewed your submission and would like to invite Usona Institute to submit a full proposal by March 15, 2025. Please use the attached guidelines..." },
+      { type: "file", icon: "📄", date: "Jan 10, 2025", subject: "LOI Submitted", from: "SharePoint: /Philanthropy/Aurora Health/2025", preview: "Letter of Inquiry submitted via online portal. Requesting $100,000 for Phase III research support." },
+    ],
+    docs: [
+      { icon: "📝", name: "Aurora Health LOI — Final.docx", meta: "SharePoint · Modified Jan 10, 2025", size: "320 KB" },
+      { icon: "📋", name: "Aurora Health RFP Guidelines.pdf", meta: "SharePoint · Modified Jan 28, 2025", size: "1.8 MB" },
+      { icon: "📝", name: "Full Proposal Draft v1.docx", meta: "SharePoint · Modified Feb 3, 2025", size: "445 KB" },
+    ]
+  },
+  {
+    id: 4, name: "Patricia & James Ostrowski", org: "Individual Donors",
+    email: "patriciao@ostrowski.net", type: "prospect",
+    lastGift: "—", highestGift: "—", totalGiving: "$0", lastContact: "Nov 5, 2024",
+    stage: "Prospect", tags: ["Warm Prospect", "Personal Referral", "Event Attendee"],
+    communications: [
+      { type: "note", icon: "📝", date: "Nov 5, 2024", subject: "Introduction via Dr. Kowalski", from: "Logged by: Liz Hartmann", preview: "Steve introduced Patricia at the November research event. She is a retired psychiatrist with deep interest in psychedelic-assisted therapy. Very warm conversation — she asked thoughtful questions about the trial design. James was not present but Steve says he is supportive. Invited to spring event. Send personal follow-up." },
+      { type: "email", icon: "✉", date: "Nov 12, 2024", subject: "Wonderful to meet you at the Usona event", from: "Liz Hartmann → patriciao@ostrowski.net", preview: "Dear Patricia, it was such a pleasure speaking with you last Tuesday. Your perspective as a practicing psychiatrist on the potential of this research is deeply meaningful to us..." },
+    ],
+    docs: []
+  },
+  {
+    id: 5, name: "Meridian Family Trust", org: "Private Trust",
+    email: "c.meridian@meridianlegal.com", type: "prospect",
+    lastGift: "—", highestGift: "—", totalGiving: "$0", lastContact: "Dec 3, 2024",
+    stage: "Qualifying", tags: ["High Capacity", "Indirect Referral", "Mental Health Focus"],
+    communications: [
+      { type: "note", icon: "📝", date: "Dec 3, 2024", subject: "Initial research — referral from board member", from: "Logged by: Liz Hartmann", preview: "Board member Carol flagged the Meridian Family Trust as a potential major prospect. Trust managed by Craig Meridian at Meridian Legal. Family has history of mental health philanthropy in the upper Midwest. Estimated capacity $500K+. Need to identify a warm introduction pathway — ask Carol if she has a personal connection." },
+    ],
+    docs: [
+      { icon: "📝", name: "Prospect Research — Meridian.docx", meta: "SharePoint · Modified Dec 5, 2024", size: "210 KB" },
+    ]
+  }
+];
+
+let activeContact = null;
+let activeTab = 'communications';
+let activeFilter = 'all';
+
+function getColor(id) { return COLORS[id % COLORS.length]; }
+
+function renderContactList(list) {
+  const el = document.getElementById('contactList');
+  el.innerHTML = list.map(c => {
+    const [bg, fg] = getColor(c.id);
+    const initials = c.name.split(' ').slice(0,2).map(w=>w[0]).join('');
+    return `<div class="contact-item ${activeContact?.id === c.id ? 'active' : ''}" onclick="selectContact(${c.id})">
+      <div class="avatar" style="background:${bg};color:${fg}">${initials}</div>
+      <div class="contact-info">
+        <div class="contact-name">${c.name}</div>
+        <div class="contact-meta">${c.org}</div>
+      </div>
+      <div class="contact-gift">${c.lastGift !== '—' ? c.lastGift : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function filterContacts() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const list = contacts.filter(c =>
+    (activeFilter === 'all' || c.type === activeFilter) &&
+    (c.name.toLowerCase().includes(q) || c.org.toLowerCase().includes(q))
+  );
+  renderContactList(list);
+}
+
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  filterContacts();
+}
+
+function selectContact(id) {
+  activeContact = contacts.find(c => c.id === id);
+  activeTab = 'communications';
+  renderDetail();
+  filterContacts();
+}
+
+function renderDetail() {
+  const c = activeContact;
+  const [bg, fg] = getColor(c.id);
+  const initials = c.name.split(' ').slice(0,2).map(w=>w[0]).join('');
+
+  document.getElementById('mainPanel').innerHTML = `
+    <div class="detail-header animate-in">
+      <div class="detail-name-row">
+        <div class="detail-avatar" style="background:${bg};color:${fg}">${initials}</div>
+        <div class="detail-name-info">
+          <h1>${c.name}</h1>
+          <p>${c.org} · ${c.email}</p>
+          <div class="detail-tags">${c.tags.map(t=>`<span class="tag">${t}</span>`).join('')}<span class="tag" style="background:#0f201a;color:#6dbf8a;border-color:#1a4030">${c.stage}</span></div>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">Last Gift</div><div class="stat-value">${c.lastGift}</div><div class="stat-sub">Last Contact: ${c.lastContact}</div></div>
+        <div class="stat-card"><div class="stat-label">Highest Gift</div><div class="stat-value">${c.highestGift}</div></div>
+        <div class="stat-card"><div class="stat-label">Total Giving</div><div class="stat-value">${c.totalGiving}</div></div>
+        <div class="stat-card"><div class="stat-label">Documents</div><div class="stat-value" style="color:var(--accent2)">${c.docs.length}</div><div class="stat-sub">in SharePoint</div></div>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab ${activeTab==='communications'?'active':''}" onclick="switchTab('communications')">Communications</div>
+      <div class="tab ${activeTab==='notes'?'active':''}" onclick="switchTab('notes')">Notes</div>
+      <div class="tab ${activeTab==='documents'?'active':''}" onclick="switchTab('documents')">Documents (${c.docs.length})</div>
+    </div>
+    <div class="content animate-in" id="tabContent">${renderTabContent()}</div>
+  `;
+}
+
+function renderTabContent() {
+  const c = activeContact;
+  if (activeTab === 'communications') {
+    if (!c.communications.length) return `<div class="empty-state"><div class="empty-icon">✉</div><div class="empty-title">No Communications Yet</div></div>`;
+    return `<div class="timeline">${c.communications.map(m => `
+      <div class="timeline-item">
+        <div class="timeline-icon icon-${m.type}">${m.icon}</div>
+        <div class="timeline-body">
+          <div class="tl-header">
+            <div class="tl-subject">${m.subject}</div>
+            <div class="tl-date">${m.date}</div>
+          </div>
+          <div class="tl-from">${m.from}</div>
+          <div class="tl-preview">${m.preview}</div>
+          ${m.attachment ? `<div class="tl-attachment">📎 ${m.attachment}</div>` : ''}
+        </div>
+      </div>`).join('')}</div>`;
+  }
+  if (activeTab === 'notes') {
+    const notes = c.communications.filter(m => m.type === 'note');
+    if (!notes.length) return `<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-title">No Notes Yet</div></div>`;
+    return `<div class="notes-grid">${notes.map(n=>`
+      <div class="note-card">
+        <div class="note-meta"><span>${n.date}</span><span>${n.from}</span></div>
+        <div class="note-text">${n.preview}</div>
+      </div>`).join('')}</div>`;
+  }
+  if (activeTab === 'documents') {
+    if (!c.docs.length) return `<div class="empty-state"><div class="empty-icon">📄</div><div class="empty-title">No Documents</div><div class="empty-sub">Documents from SharePoint will appear here once connected.</div></div>`;
+    return `<div class="docs-grid">${c.docs.map(d=>`
+      <div class="doc-row">
+        <div class="doc-icon">${d.icon}</div>
+        <div class="doc-info"><div class="doc-name">${d.name}</div><div class="doc-meta">${d.meta} · ${d.size}</div></div>
+        <div class="doc-arrow">↗</div>
+      </div>`).join('')}</div>`;
+  }
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tabContent').innerHTML = renderTabContent();
+}
+
+// Init
+renderContactList(contacts);
+</script>
+</body>
+</html>
